@@ -1,4 +1,4 @@
-package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.service_info;
+package com.arkaces.ark_ethereum_lite_dual_channel_service.common.server_info;
 
 import com.arkaces.aces_server.aces_service.server_info.Capacity;
 import com.fasterxml.jackson.databind.JsonNode;

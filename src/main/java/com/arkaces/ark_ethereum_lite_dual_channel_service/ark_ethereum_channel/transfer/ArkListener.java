@@ -1,15 +1,14 @@
-package com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.ark_listener;
+package com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.transfer;
 
 import ark_java_client.ArkClient;
 import ark_java_client.Transaction;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.config.Config;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.contract.ContractEntity;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.contract.ContractRepository;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.transfer.NewArkTransactionEvent;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.transfer.TransferEntity;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.config.Config;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.contract.ContractEntity;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.contract.ContractRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -26,16 +25,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ArkListener {
 
+    @Qualifier("arkEthereumChannel.contractRepository")
     private final ContractRepository contractRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final Integer arkMinConfirmations;
     private final ArkClient arkClient;
+    @Qualifier("arkEthereumChannel.config")
     private final Config config;
 
-    @Scheduled(fixedDelayString = "${arkScanIntervalSec}000")
+    @Scheduled(fixedDelayString = "${arkEthereumChannel.arkScanIntervalSec}000")
     @Transactional
     public void scan() {
-        log.info("Scanning for transactions");
+        log.info("Scanning for Ark transactions");
         try {
             Integer limit = 50;
             Map<String, Transaction> transactionsById = new HashMap<>();
@@ -53,7 +53,7 @@ public class ArkListener {
                 Set<String> newTxnIds = transactionsById.values().stream()
                         .filter(transaction -> transaction.getRecipientId().equals(contractEntity.getDepositArkAddress()))
                         .filter(transaction -> ! existingTxnIds.contains(transaction.getId()))
-                        .filter(transaction -> transaction.getConfirmations() >= arkMinConfirmations)
+                        .filter(transaction -> transaction.getConfirmations() >= config.getArkMinConfirmations())
                         .map(Transaction::getId)
                         .collect(Collectors.toSet());
 
@@ -67,7 +67,7 @@ public class ArkListener {
             }
         }
         catch (Exception e) {
-            log.error("Transaction listener threw exception while running", e);
+            log.error("Ark Transaction listener threw exception while running", e);
         }
     }
 }

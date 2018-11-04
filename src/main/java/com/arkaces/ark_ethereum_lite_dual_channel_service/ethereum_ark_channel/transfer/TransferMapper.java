@@ -4,23 +4,23 @@ import org.springframework.stereotype.Service;
 
 import java.time.ZoneOffset;
 
-@Service
+@Service("ethereumArkChannel.transferMapper")
 public class TransferMapper {
     
     public Transfer map(TransferEntity transferEntity) {
         Transfer transfer = new Transfer();
         transfer.setId(transferEntity.getId());
         transfer.setStatus(transferEntity.getStatus());
+        transfer.setEthTransactionId(transferEntity.getEthTransactionId());
+        transfer.setArkSendAmount(transferEntity.getArkSendAmount().toPlainString());
         transfer.setArkTransactionId(transferEntity.getArkTransactionId());
-        transfer.setBtcSendAmount(transferEntity.getBtcSendAmount().toPlainString());
-        transfer.setBtcTransactionId(transferEntity.getBtcTransactionId());
-        transfer.setArkAmount(transferEntity.getArkAmount().toPlainString());
-        transfer.setArkFlatFee(transferEntity.getArkFlatFee().toPlainString());
-        transfer.setArkPercentFee(transferEntity.getArkPercentFee().toPlainString());
-        transfer.setArkToBtcRate(transferEntity.getArkToBtcRate().toPlainString());
-        transfer.setArkTotalFee(transferEntity.getArkTotalFee().toPlainString());
+        transfer.setEthAmount(transferEntity.getEthAmount().toPlainString());
+        transfer.setEthFlatFee(transferEntity.getEthFlatFee().toPlainString());
+        transfer.setEthPercentFee(transferEntity.getEthPercentFee().toPlainString());
+        transfer.setEthToArkRate(transferEntity.getEthToArkRate().toPlainString());
+        transfer.setEthTotalFee(transferEntity.getEthTotalFee().toPlainString());
         transfer.setCreatedAt(transferEntity.getCreatedAt().atOffset(ZoneOffset.UTC).toString());
-        transfer.setReturnArkTransactionId(transferEntity.getReturnArkTransactionId());
+        transfer.setReturnEthTransactionId(transferEntity.getReturnEthTransactionId());
         
         return transfer;
     }

@@ -1,6 +1,7 @@
-package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.service_info;
+package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.config;
 
 import com.arkaces.aces_server.aces_service.server_info.Capacity;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.common.server_info.PropertyUrlTemplate;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -8,8 +9,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Data
-@Component
-@ConfigurationProperties(prefix = "server-info")
+@Component("ethereumArkChannel.serverInfoSettings")
+@ConfigurationProperties(prefix = "ethereum-ark-channel.server-info")
 public class ServerInfoSettings {
     private String name;
     private String description;

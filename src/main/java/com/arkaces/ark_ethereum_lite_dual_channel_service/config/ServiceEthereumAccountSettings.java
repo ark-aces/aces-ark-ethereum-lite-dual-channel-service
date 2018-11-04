@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "service-bitcoin-account")
-public class ServiceBitcoinAccountSettings {
-    private String privateKey;
+@ConfigurationProperties(prefix = "service-ethereum-account")
+public class ServiceEthereumAccountSettings {
+    private String address;
+    private String passphrase;
 }

@@ -2,6 +2,8 @@ server:
   port: 9190
 
 spring:
+  data:
+    jpa.repositories.bootstrap-mode: deferred
   datasource:
     platform: "postgres"
     url: "jdbc:postgresql://localhost:5432/aces_ark_ethereum_lite_dual_channel_service_db"
@@ -21,8 +23,34 @@ spring:
       mail.smtp.auth: true
       mail.startttls.enable: true
 
+# Send notifications on low capacity and transfer completed/failed
+notifications:
+  enabled: false
+  recipientEmailAddress: "change_me"
+  fromEmailAddress: "change_me"
+
+serviceName: "Ark Ethereum Dual Channel Service"
+
+arkNetworkConfigPath: "ark_network_config/mainnet.yml"
+
+serviceArkAccount:
+  address: "change-me"
+  passphrase: "change-me"
+
+ethereumRpc:
+  url: http://127.0.0.1:8545
+
+serviceEthereumAccount:
+  address: "change-me"
+  passphrase: "change-me"
+
+logging:
+  level:
+    com.arkaces.aces_listener_ethereum.EthereumEventListener: ERROR
+
 arkEthereumChannel:
   enabled: true
+  urlPrefix: "arkEthereumChannel"
 
   serverInfo:
     name: "Aces ARK-ETH Lite Channel Service"
@@ -36,10 +64,10 @@ arkEthereumChannel:
       {
         "type": "object",
         "properties": {
-          "recipientBtcAddress": {
+          "recipientEthAddress": {
             "type": "string",
-            "title": "Recipient BTC Address",
-            "description": "Enter recipient BTC address to transfer funds to."
+            "title": "Recipient ETH Address",
+            "description": "Enter recipient ETH address to transfer funds to."
           },
            "returnArkAddress": {
               "type": "string",
@@ -48,7 +76,7 @@ arkEthereumChannel:
             }
         },
         "required": [
-          "recipientBtcAddress"
+          "recipientEthAddress"
         ]
       }
     outputSchema: >
@@ -60,10 +88,10 @@ arkEthereumChannel:
             "title": "Deposit ARK Address",
             "description": "Send ARK to this address to execute contract."
           },
-          "recipientBtcAddress": {
+          "recipientEthAddress": {
             "type": "string",
-            "title": "Recipient BTC Address",
-            "description": "BTC will arrive at this address on contract execution."
+            "title": "Recipient ETH Address",
+            "description": "ETH will arrive at this address on contract execution."
           },
           "returnArkAddress": {
             "type": "string",
@@ -98,10 +126,10 @@ arkEthereumChannel:
                 "title": "Transfer Amount (ARK)",
                 "description": "The amount of ARK to transfer"
               },
-              "arkToBtcRate": {
+              "arkToEthRate": {
                 "type": "string",
-                "title": "BTC/ARK Exchange Rate",
-                "description": "Amount of BTC to receive per ARK"
+                "title": "ETH/ARK Exchange Rate",
+                "description": "Amount of ETH to receive per ARK"
               },
               "arkFlatFee": {
                 "type": "string",
@@ -118,15 +146,15 @@ arkEthereumChannel:
                 "title": "Total Fees (ARK)",
                 "description": "The sum of flat fees and percentage fees, charged in ARK"
               },
-              "btcSendAmount": {
+              "ethSendAmount": {
                 "type": "string",
-                "title": "Receiving Amount (BTC)",
-                "Description": "Total BTC to be received, net of fees"
+                "title": "Receiving Amount (ETH)",
+                "Description": "Total ETH to be received, net of fees"
               },
-              "btcTransactionId": {
+              "ethTransactionId": {
                 "type": "string",
-                "title": "Transaction ID (BTC)",
-                "description": "The transaction ID for the BTC contract fulfillment"
+                "title": "Transaction ID (ETH)",
+                "description": "The transaction ID for the ETH contract fulfillment"
               },
               "returnArkTransactionId": {
                 "type": "string",
@@ -145,14 +173,14 @@ arkEthereumChannel:
         property: "returnArkAddress"
         urlTemplate: "https://explorer.ark.io/transaction/{value}"
       -
-        property: "recipientBtcAddress"
-        urlTemplate: "https://live.blockcypher.com/btc/tx/{value}/"
+        property: "recipientEthAddress"
+        urlTemplate: "https://etherscan.io/address/{value}/"
       -
         property: "transfers.arkTransactionId"
         urlTemplate: "https://explorer.ark.io/transaction/{value}"
       -
-        property: "transfers.btcTransactionId"
-        urlTemplate: "https://live.blockcypher.com/btc/tx/{value}/"
+        property: "transfers.ethTransactionId"
+        urlTemplate: "https://etherscan.io/tx/{value}/"
       -
         property: "transfers.returnArkTransactionId"
         urlTemplate: "https://explorer.ark.io/transaction/{value}"
@@ -161,7 +189,7 @@ arkEthereumChannel:
 
   capacityUpdateIntervalSec: 3600
 
-  arkScanIntervalSec: 60
+  arkScanIntervalSec: 10
   arkScanDepth: 50
 
   flatFee: 0.0001
@@ -176,7 +204,7 @@ arkEthereumChannel:
     fromSymbol: "ARK"
 
     # CryptoCompare Currency symbol to exchange to
-    toSymbol: "BTC"
+    toSymbol: "ETH"
 
     # A rate multiplier (for testing purposes if using non-mainnet coins)
     multiplier: 1
@@ -189,7 +217,8 @@ arkEthereumChannel:
 
 
 ethereumArkChannel:
-  enabled: true
+  enabled: false
+  urlPrefix: "ethereumArkChannel"
 
   serverInfo:
     name: "Aces ARK-ETH Lite Channel Service"
@@ -290,7 +319,9 @@ ethereumArkChannel:
         }
       }
 
+  scanIntervalSec: 10
   maxScanBlockDepth: 4
+  minConfirmations: 1
 
   capacityUnit: "ARK"
 
@@ -300,8 +331,6 @@ ethereumArkChannel:
   flatFeeUnit: "ETH"
 
   percentFee: 1
-
-  minConfirmations: 1
 
   exchangeRate:
     # CryptoCompare Currency symbol to exchange from
@@ -319,28 +348,3 @@ ethereumArkChannel:
   # Capacity threshold at which low capacity notifications will be sent
   lowCapacityThreshold: "100.00"
 
-
-arkNetworkConfigPath: "ark_network_config/mainnet.yml"
-
-serviceArkAccount:
-  address: "change-me"
-  passphrase: "change-me"
-
-ethereumRpc:
-  url: http://127.0.0.1:8545
-
-serviceEthereumAccount:
-  address: "change-me"
-  passphrase: "change-me"
-
-
-# Send notifications on low capacity and transfer completed/failed
-notifications:
-  enabled: false
-  recipientEmailAddress: "change_me"
-  fromEmailAddress: "change_me"
-
-
-logging:
-  level:
-    com.arkaces.aces_listener_ethereum.EthereumEventListener: ERROR

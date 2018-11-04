@@ -7,13 +7,13 @@ public class Transfer {
     private String id;
     private String status;
     private String createdAt;
+    private String ethTransactionId;
+    private String ethAmount;
+    private String ethToArkRate;
+    private String ethFlatFee;
+    private String ethPercentFee;
+    private String ethTotalFee;
+    private String arkSendAmount;
     private String arkTransactionId;
-    private String arkAmount;
-    private String arkToBtcRate;
-    private String arkFlatFee;
-    private String arkPercentFee;
-    private String arkTotalFee;
-    private String btcSendAmount;
-    private String btcTransactionId;
-    private String returnArkTransactionId;
+    private String returnEthTransactionId;
 }

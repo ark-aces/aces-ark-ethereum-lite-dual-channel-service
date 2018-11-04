@@ -3,23 +3,21 @@ package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.
 import com.arkaces.aces_server.aces_service.contract.CreateContractRequest;
 import com.arkaces.aces_server.common.error.ValidatorException;
 import lombok.RequiredArgsConstructor;
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
 import org.bitcoinj.core.Base58;
-import org.bitcoinj.core.NetworkParameters;
-import org.bouncycastle.util.encoders.DecoderException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
-@Service
+@Service("ethereumArkChannel.createContractRequestValidator")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CreateContractRequestValidator {
-    
+
+    @Qualifier("ethereumArkChannel.contractRepository")
     private final ContractRepository contractRepository;
-    private final NetworkParameters networkParameters;
 
     public void validate(CreateContractRequest<Arguments> createContractRequest) {
         BindingResult bindingResult = new BeanPropertyBindingResult(createContractRequest, "createContractRequest");
@@ -28,51 +26,37 @@ public class CreateContractRequestValidator {
         if (! StringUtils.isEmpty(correlationId)) {
             ContractEntity contractEntity = contractRepository.findOneByCorrelationId(correlationId);
             if (contractEntity != null) {
-                bindingResult.rejectValue("correlationId", FieldErrorCodes.DUPLICATE_CORRELATION_ID, 
+                bindingResult.rejectValue("correlationId", FieldErrorCodes.DUPLICATE_CORRELATION_ID,
                     "A contract with the given correlation ID already exists.");
             }
         }
         
-        String recipientBtcAddress = createContractRequest.getArguments().getRecipientBtcAddress();
-        if (StringUtils.isEmpty(recipientBtcAddress)) {
-            bindingResult.rejectValue("arguments.recipientBtcAddress", FieldErrorCodes.REQUIRED, "Recipient BTC address required.");
+        String recipientArkAddress = createContractRequest.getArguments().getRecipientArkAddress();
+        if (StringUtils.isEmpty(recipientArkAddress)) {
+            bindingResult.rejectValue("arguments.recipientArkAddress", FieldErrorCodes.REQUIRED, "Recipient ARK address required.");
         } else {
             try {
-                new Address(networkParameters, recipientBtcAddress);
-            } catch (AddressFormatException e) {
-                bindingResult.rejectValue(
-                        "arguments.recipientBtcAddress",
-                        FieldErrorCodes.INVALID_BTC_ADDRESS_CHECKSUM,
-                        "Invalid BTC address checksum."
-                );
-            } catch (DecoderException e) {
-                bindingResult.rejectValue(
-                        "arguments.recipientBtcAddress",
-                        FieldErrorCodes.INVALID_BTC_ADDRESS,
-                        "Invalid BTC address."
-                );
-            }
-        }
-
-        String returnArkAddress = createContractRequest.getArguments().getReturnArkAddress();
-        if (! StringUtils.isEmpty(returnArkAddress)) {
-            try {
-                Base58.decodeChecked(returnArkAddress);
+                Base58.decodeChecked(recipientArkAddress);
             } catch (AddressFormatException exception) {
                 if (exception.getMessage().equals("Checksum does not validate")) {
                     bindingResult.rejectValue(
-                            "arguments.returnArkAddress",
+                            "arguments.recipientArkAddress",
                             FieldErrorCodes.INVALID_ARK_ADDRESS_CHECKSUM,
                             "Invalid ARK address checksum."
                     );
                 } else {
                     bindingResult.rejectValue(
-                            "arguments.returnArkAddress",
+                            "arguments.recipientArkAddress",
                             FieldErrorCodes.INVALID_ARK_ADDRESS,
                             "Invalid ARK address."
                     );
                 }
             }
+        }
+
+        String returnEthAddress = createContractRequest.getArguments().getReturnEthAddress();
+        if (! StringUtils.isEmpty(returnEthAddress)) {
+            // todo: validate eth address
         }
 
         if (bindingResult.hasErrors()) {

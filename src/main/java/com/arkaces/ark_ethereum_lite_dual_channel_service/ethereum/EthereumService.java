@@ -1,6 +1,7 @@
 package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum;
 
 import com.arkaces.aces_server.common.json.NiceObjectMapper;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -28,25 +30,36 @@ public class EthereumService {
     private final EthereumRpcRequestFactory ethereumRpcRequestFactory = new EthereumRpcRequestFactory();
     private final RestTemplate ethereumRpcRestTemplate;
 
-    public void unlockWallet() {
-        EthereumRpcResponse<Boolean> unlockResponse = ethereumRpcRestTemplate
+    private final Integer accountUnlockTimeoutSeconds = 30;
+
+    public Block getLatestBlock() {
+        HttpEntity<String> requestEntity = getRequestEntity("eth_getBlockByNumber", Arrays.asList("latest", true));
+        return ethereumRpcRestTemplate
                 .exchange(
                         "/",
                         HttpMethod.POST,
-                        getRequestEntity("personal_unlockAccount", Arrays.asList(
-                                serviceEthAccountSettings.getAddress(),
-                                serviceEthAccountSettings.getPassphrase(),
-                                accountUnlockTimeoutSeconds
-                        )),
-                        new ParameterizedTypeReference<EthereumRpcResponse<Boolean>>() {}
+                        requestEntity,
+                        new ParameterizedTypeReference<EthereumRpcResponse<Block>>() {}
                 )
-                .getBody();
+                .getBody()
+                .getResult();
+    }
 
-        if (unlockResponse.getError() != null || unlockResponse.getResult() == null || ! unlockResponse.getResult()) {
-            RpcError rpcError = unlockResponse.getError();
-            throw new EthereumRpcException("Failed to unlock service account", rpcError.getCode(), rpcError.getMessage());
-        }
+    public Block getBlockByHash(String hash) {
+        HttpEntity<String> requestEntity = getRequestEntity("eth_getBlockByHash", Arrays.asList(hash, true));
+        return ethereumRpcRestTemplate
+                .exchange(
+                        "/",
+                        HttpMethod.POST,
+                        requestEntity,
+                        new ParameterizedTypeReference<EthereumRpcResponse<Block>>() {}
+                )
+                .getBody()
+                .getResult();
+    }
 
+    public BigDecimal getTransactionFee() {
+        return ethereumWeiService.toEther(Constants.GAS_PRICE.multiply(new BigInteger("21000")).longValue());
     }
 
     public String createAddress(String passphrase) {
@@ -59,8 +72,25 @@ public class EthereumService {
         ).getBody().getResult();
     }
 
-    public String sendTransaction(String from, String to, BigDecimal etherValue) {
-        Long wei = ethereumWeiService.toWei(etherValue);
+    public String sendTransaction(String from, String to, BigDecimal ethValue, String fromPassphrase) {
+        EthereumRpcResponse<Boolean> unlockResponse = ethereumRpcRestTemplate
+                .exchange(
+                        "/",
+                        HttpMethod.POST,
+                        getRequestEntity("personal_unlockAccount", Arrays.asList(
+                                from,
+                                fromPassphrase,
+                                accountUnlockTimeoutSeconds
+                        )),
+                        new ParameterizedTypeReference<EthereumRpcResponse<Boolean>>() {}
+                )
+                .getBody();
+        if (unlockResponse.getError() != null || unlockResponse.getResult() == null || ! unlockResponse.getResult()) {
+            RpcError rpcError = unlockResponse.getError();
+            throw new EthereumRpcException("Failed to unlock service account", rpcError.getCode(), rpcError.getMessage());
+        }
+
+        Long wei = ethereumWeiService.toWei(ethValue);
         String value = getHexStringFromWei(wei);
         SendTransaction sendTransaction = SendTransaction.builder()
                 .from(from)
@@ -68,12 +98,16 @@ public class EthereumService {
                 .value(value)
                 .build();
         HttpEntity<String> requestEntity = getRequestEntity("eth_sendTransaction", Collections.singletonList(sendTransaction));
-        return ethereumRpcRestTemplate.exchange(
-                "/",
-                HttpMethod.POST,
-                requestEntity,
-                new ParameterizedTypeReference<EthereumRpcResponse<String>>() {}
-        ).getBody().getResult();
+
+        return ethereumRpcRestTemplate
+                .exchange(
+                        "/",
+                        HttpMethod.POST,
+                        requestEntity,
+                        new ParameterizedTypeReference<EthereumRpcResponse<String>>() {}
+                )
+                .getBody()
+                .getResult();
     }
 
     private String getHexStringFromWei(Long wei) {

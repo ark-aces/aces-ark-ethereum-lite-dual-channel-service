@@ -1,16 +1,17 @@
-package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.transfer;
+package com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.transfer;
 
 import ark_java_client.Transaction;
 import com.arkaces.aces_server.common.identifer.IdentifierGenerator;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.config.Config;
 import com.arkaces.ark_ethereum_lite_dual_channel_service.ark.ArkSatoshiService;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.contract.ContractEntity;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.contract.ContractRepository;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.electrum.ElectrumService;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.exchange_rate.ExchangeRateService;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.config.Config;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.contract.ContractEntity;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.contract.ContractRepository;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.exchange_rate.ExchangeRateService;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum.EthereumService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -25,13 +26,18 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ArkTransactionEventHandler {
 
+    @Qualifier("arkEthereumChannel.contractRepository")
     private final ContractRepository contractRepository;
+    @Qualifier("arkEthereumChannel.transferRepository")
     private final TransferRepository transferRepository;
     private final IdentifierGenerator identifierGenerator;
+    @Qualifier("arkEthereumChannel.exchangeRateService")
     private final ExchangeRateService exchangeRateService;
+    @Qualifier("arkEthereumChannel.config")
     private final Config config;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ArkSatoshiService arkSatoshiService;
+    private final EthereumService ethereumService;
 
     @EventListener
     @Transactional
@@ -46,7 +52,7 @@ public class ArkTransactionEventHandler {
             return;
         }
         
-        log.info("Matched event for contract id " + contractEntity.getId() + " btc transaction id " + arkTransactionId);
+        log.info("Matched event for contract id " + contractEntity.getId() + " ark transaction id " + arkTransactionId);
 
         TransferEntity existingTransferEntity = transferRepository.findOneByArkTransactionId(arkTransactionId);
         if (existingTransferEntity != null) {
@@ -69,8 +75,8 @@ public class ArkTransactionEventHandler {
         BigDecimal incomingArkAmount = arkSatoshiService.toArk(transaction.getAmount());
         transferEntity.setArkAmount(incomingArkAmount);
 
-        BigDecimal arkToBtcRate = exchangeRateService.getRate();
-        transferEntity.setArkToBtcRate(arkToBtcRate);
+        BigDecimal arkToEthRate = exchangeRateService.getRate();
+        transferEntity.setArkToEthRate(arkToEthRate);
         
         transferEntity.setArkFlatFee(config.getFlatFee());
         transferEntity.setArkPercentFee(config.getPercentFee());
@@ -80,21 +86,19 @@ public class ArkTransactionEventHandler {
         BigDecimal arkTotalFeeAmount = incomingArkAmount.multiply(percentFee).add(config.getFlatFee());
         transferEntity.setArkTotalFee(arkTotalFeeAmount);
 
-        // Calculate send btc amount
         BigDecimal arkSendAmount = incomingArkAmount.subtract(arkTotalFeeAmount);
-        BigDecimal btcSendAmount = arkSendAmount.multiply(arkToBtcRate).setScale(8, RoundingMode.HALF_DOWN);
+        BigDecimal ethSendAmount = arkSendAmount.multiply(arkToEthRate).setScale(8, RoundingMode.HALF_DOWN);
 
-        BigDecimal btcTransactionFeeAmount = new BigDecimal(org.bitcoinj.core.Transaction.DEFAULT_TX_FEE.longValue())
-                .divide(new BigDecimal(ElectrumService.SATOSHIS_PER_BTC), 10, BigDecimal.ROUND_HALF_UP);
-        if (btcSendAmount.compareTo(btcTransactionFeeAmount) <= 0) {
-            btcSendAmount = BigDecimal.ZERO;
+        BigDecimal ethTransactionFee = ethereumService.getTransactionFee();
+        if (ethSendAmount.compareTo(ethTransactionFee) <= 0) {
+            ethSendAmount = BigDecimal.ZERO;
         }
-        transferEntity.setBtcSendAmount(btcSendAmount);
+        transferEntity.setEthSendAmount(ethSendAmount);
 
         transferRepository.save(transferEntity);
         
-        NewTransferEvent newTransferEvent = new NewTransferEvent();
-        newTransferEvent.setTransferPid(transferEntity.getPid());
-        applicationEventPublisher.publishEvent(newTransferEvent);
+        NewArkTransferEvent newArkTransferEvent = new NewArkTransferEvent();
+        newArkTransferEvent.setTransferPid(transferEntity.getPid());
+        applicationEventPublisher.publishEvent(newArkTransferEvent);
     }
 }

@@ -2,13 +2,17 @@ package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.
 
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "service_capacities")
+@Table(name = "service_capacities", schema = "ethereum_ark_channel")
 public class ServiceCapacityEntity {
 
     @Id

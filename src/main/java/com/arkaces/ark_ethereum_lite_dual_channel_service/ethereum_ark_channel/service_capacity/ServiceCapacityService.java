@@ -1,11 +1,11 @@
 package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.service_capacity;
 
-import com.arkaces.ark_ethereum_lite_dual_channel_service.config.ServiceBitcoinAccountSettings;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.electrum.ElectrumService;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ark.ArkService;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.config.Config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
@@ -17,15 +17,16 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 @Slf4j
-@Service
+@Service("ethereumArkChannel.serviceCapacityService")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Transactional
 public class ServiceCapacityService {
     
-    private final ElectrumService electrumService;
-    private final ServiceBitcoinAccountSettings serviceBitcoinAccountSettings;
+    private final ArkService arkService;
+    @Qualifier("ethereumArkChannel.serviceCapacityRepository")
     private final ServiceCapacityRepository serviceCapacityRepository;
-    private final Environment environment;
+    @Qualifier("ethereumArkChannel.config")
+    private final Config config;
 
     public void updateCapacities() {
         LocalDateTime now = LocalDateTime.now();
@@ -40,7 +41,7 @@ public class ServiceCapacityService {
         BigDecimal accountBalance;
         try {
             accountBalance = template.execute((RetryCallback<BigDecimal, Exception>) context ->
-                    electrumService.getBalance(serviceBitcoinAccountSettings.getPrivateKey()));
+                    arkService.getServiceArkBalance());
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse value", e);
         }
@@ -52,7 +53,7 @@ public class ServiceCapacityService {
             serviceCapacityEntity.setAvailableAmount(accountBalance);
             serviceCapacityEntity.setUnsettledAmount(BigDecimal.ZERO);
             serviceCapacityEntity.setTotalAmount(accountBalance);
-            serviceCapacityEntity.setUnit(environment.getProperty("capacityUnit"));
+            serviceCapacityEntity.setUnit(config.getCapacityUnit());
             serviceCapacityEntity.setCreatedAt(now);
             serviceCapacityEntity.setUpdatedAt(now);
         } else {
@@ -62,7 +63,7 @@ public class ServiceCapacityService {
             
             serviceCapacityEntity.setAvailableAmount(availableAmount);
             serviceCapacityEntity.setTotalAmount(accountBalance);
-            serviceCapacityEntity.setUnit(environment.getProperty("capacityUnit"));
+            serviceCapacityEntity.setUnit(config.getCapacityUnit());
             serviceCapacityEntity.setUpdatedAt(now);
 
         }
@@ -74,7 +75,7 @@ public class ServiceCapacityService {
     public ServiceCapacityEntity getLockedCapacityEntity() {
         return serviceCapacityRepository.findOneForUpdate(1L);
     }
-    
+
     public BigDecimal getAvailableAmount() {
         return serviceCapacityRepository.findById(1L)
             .map(ServiceCapacityEntity::getAvailableAmount)

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
 @Data
-@Component
-@ConfigurationProperties(prefix = "exchange-rate")
+@Component("ethereumArkChannel.exchangeRateSettings")
+@ConfigurationProperties(prefix = "ethereum-ark-channel.exchange-rate")
 public class ExchangeRateSettings {
     private String fromSymbol;
     private String toSymbol;

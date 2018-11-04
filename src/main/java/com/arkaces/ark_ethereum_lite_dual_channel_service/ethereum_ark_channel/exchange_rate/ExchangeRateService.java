@@ -3,6 +3,7 @@ package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.
 import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.config.ExchangeRateSettings;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -12,10 +13,11 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.util.Map;
 
-@Service
+@Service("ethereumArkChannel.exchangeRateService")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ExchangeRateService {
 
+    @Qualifier("ethereumArkChannel.exchangeRateSettings")
     private final ExchangeRateSettings exchangeRateSettings;
 
     private final RestTemplate restTemplate = new RestTemplateBuilder()

@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class Arguments {
-    private String recipientBtcAddress;
-    private String returnArkAddress;
+    private String recipientArkAddress;
+    private String returnEthAddress;
 }
