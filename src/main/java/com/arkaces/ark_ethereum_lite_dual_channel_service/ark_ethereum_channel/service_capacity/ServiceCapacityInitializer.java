@@ -9,7 +9,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component("arkEthereumChannel.serviceCapacityInitializer")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 @ConditionalOnProperty("arkEthereumChannel.enabled")

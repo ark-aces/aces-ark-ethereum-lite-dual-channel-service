@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("ethereumArkChannel.serviceCapacityUpdater")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 @ConditionalOnProperty("ethereumArkChannel.enabled")
