@@ -1,7 +1,7 @@
 package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.contract;
 
 import com.arkaces.aces_server.aces_service.contract.Contract;
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.transfer.TransferMapper;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.transfer.TransferMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

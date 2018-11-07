@@ -50,6 +50,7 @@ public class ServiceCapacityService {
             log.info("Capacity info does not exist, creating now!");
 
             serviceCapacityEntity = new ServiceCapacityEntity();
+            serviceCapacityEntity.setPid(1L);
             serviceCapacityEntity.setAvailableAmount(accountBalance);
             serviceCapacityEntity.setUnsettledAmount(BigDecimal.ZERO);
             serviceCapacityEntity.setTotalAmount(accountBalance);

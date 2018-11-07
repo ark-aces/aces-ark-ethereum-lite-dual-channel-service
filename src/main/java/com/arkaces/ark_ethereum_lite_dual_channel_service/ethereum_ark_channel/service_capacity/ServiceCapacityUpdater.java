@@ -20,7 +20,7 @@ public class ServiceCapacityUpdater {
     @Scheduled(fixedDelayString = "${ethereumArkChannel.capacityUpdateIntervalSec}000")
     public void sweep() {
         try {
-            log.info("Updating arkEthereumChannel capacity");
+            log.info("Updating ethereumArkChannel capacity");
             serviceCapacityService.updateCapacities();
         } catch (Exception e) {
             log.error("Failed to update arkEthereumChannel capacity", e);

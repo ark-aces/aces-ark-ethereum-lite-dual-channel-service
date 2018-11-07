@@ -23,7 +23,7 @@ import java.util.Collections;
 @RestController("ethereumArkChannel.serverInfoController")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @ConditionalOnProperty("ethereumArkChannel.enabled")
-@RequestMapping(path = "/${ethereumArkChannel.urlPrefix}")
+@RequestMapping(path = "${ethereumArkChannel.urlPrefix}")
 public class ServerInfoController {
 
     @Qualifier("ethereumArkChannel.serverInfoSettings")

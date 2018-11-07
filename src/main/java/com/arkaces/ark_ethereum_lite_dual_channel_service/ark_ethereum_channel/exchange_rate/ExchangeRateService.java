@@ -1,6 +1,6 @@
 package com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.exchange_rate;
 
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.config.ExchangeRateSettings;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.config.ExchangeRateSettings;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

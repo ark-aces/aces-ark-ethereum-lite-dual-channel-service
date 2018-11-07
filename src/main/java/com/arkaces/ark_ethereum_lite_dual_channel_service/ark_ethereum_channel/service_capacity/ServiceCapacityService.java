@@ -1,7 +1,8 @@
 package com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.service_capacity;
 
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ark.ArkService;
 import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.config.Config;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.config.ServiceEthereumAccountSettings;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum.EthereumService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +22,13 @@ import java.util.Collections;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Transactional
 public class ServiceCapacityService {
-    
-    private final ArkService arkService;
+
+    private final EthereumService ethereumService;
     @Qualifier("arkEthereumChannel.serviceCapacityRepository")
     private final ServiceCapacityRepository serviceCapacityRepository;
     @Qualifier("arkEthereumChannel.config")
     private final Config config;
+    private final ServiceEthereumAccountSettings serviceEthereumAccountSettings;
 
     public void updateCapacities() {
         LocalDateTime now = LocalDateTime.now();
@@ -41,7 +43,7 @@ public class ServiceCapacityService {
         BigDecimal accountBalance;
         try {
             accountBalance = template.execute((RetryCallback<BigDecimal, Exception>) context ->
-                    arkService.getServiceArkBalance());
+                    ethereumService.getBalance(serviceEthereumAccountSettings.getAddress()));
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse value", e);
         }
@@ -50,6 +52,7 @@ public class ServiceCapacityService {
             log.info("Capacity info does not exist, creating now!");
 
             serviceCapacityEntity = new ServiceCapacityEntity();
+            serviceCapacityEntity.setPid(1L);
             serviceCapacityEntity.setAvailableAmount(accountBalance);
             serviceCapacityEntity.setUnsettledAmount(BigDecimal.ZERO);
             serviceCapacityEntity.setTotalAmount(accountBalance);

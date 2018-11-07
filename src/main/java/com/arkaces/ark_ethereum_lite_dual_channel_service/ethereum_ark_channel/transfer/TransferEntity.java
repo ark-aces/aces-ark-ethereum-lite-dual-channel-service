@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@Entity
+@Entity(name = "ethereumArkChannel.TransferEntity")
 @Table(name = "transfers", schema = "ethereum_ark_channel")
 public class TransferEntity {
 

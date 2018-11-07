@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController("ethereumArkChannel.exchangeRateController")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @ConditionalOnProperty("ethereumArkChannel.enabled")
-@RequestMapping(path = "/${ethereumArkChannel.urlPrefix}")
+@RequestMapping(path = "${ethereumArkChannel.urlPrefix}")
 public class ExchangeRateController {
 
     @Qualifier("ethereumArkChannel.exchangeRateSettings")

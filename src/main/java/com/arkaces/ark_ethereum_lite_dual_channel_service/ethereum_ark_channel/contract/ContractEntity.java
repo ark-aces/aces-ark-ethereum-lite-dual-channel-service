@@ -1,6 +1,6 @@
 package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.contract;
 
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.transfer.TransferEntity;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.transfer.TransferEntity;
 import lombok.Data;
 
 import javax.persistence.CascadeType;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Entity
+@Entity(name = "ethereumArkChannel.ContractEntity")
 @Table(name = "contracts", schema = "ethereum_ark_channel")
 public class ContractEntity {
 

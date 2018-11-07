@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Entity
+@Entity(name = "arkEthereumChannel.ContractEntity")
 @Table(name = "contracts", schema = "ark_ethereum_channel")
 public class ContractEntity {
 

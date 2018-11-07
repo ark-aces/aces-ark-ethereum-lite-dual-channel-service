@@ -1,6 +1,6 @@
 package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.contract;
 
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.transfer.Transfer;
+import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.transfer.Transfer;
 import lombok.Data;
 
 import java.util.List;

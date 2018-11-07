@@ -110,6 +110,31 @@ public class EthereumService {
                 .getResult();
     }
 
+    public BigDecimal getBalance(String address) {
+        HttpEntity<String> requestEntity = getRequestEntity("eth_getBalance", Arrays.asList(address, "latest"));
+        EthereumRpcResponse<String> response = ethereumRpcRestTemplate
+                .exchange(
+                        "/",
+                        HttpMethod.POST,
+                        requestEntity,
+                        new ParameterizedTypeReference<EthereumRpcResponse<String>>() {}
+                )
+                .getBody();
+
+        if (response.getError() != null) {
+            RpcError rpcError = response.getError();
+            throw new EthereumRpcException("Failed to get balance", rpcError.getCode(), rpcError.getMessage());
+        }
+
+        BigInteger wei = getBigIntegerFromHexString(response.getResult());
+
+        return ethereumWeiService.toEther(wei);
+    }
+
+    private BigInteger getBigIntegerFromHexString(String hexString) {
+        return new BigInteger(hexString.replaceFirst("0x", ""), 16);
+    }
+
     private String getHexStringFromWei(Long wei) {
         return "0x" + removeLeadingZeros(Long.toHexString(wei));
     }

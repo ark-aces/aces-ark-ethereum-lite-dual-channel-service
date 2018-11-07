@@ -44,13 +44,9 @@ serviceEthereumAccount:
   address: "change-me"
   passphrase: "change-me"
 
-logging:
-  level:
-    com.arkaces.aces_listener_ethereum.EthereumEventListener: ERROR
-
 arkEthereumChannel:
   enabled: true
-  urlPrefix: "arkEthereumChannel"
+  urlPrefix: "/arkEthereumChannel"
 
   serverInfo:
     name: "Aces ARK-ETH Lite Channel Service"
@@ -218,7 +214,7 @@ arkEthereumChannel:
 
 ethereumArkChannel:
   enabled: false
-  urlPrefix: "ethereumArkChannel"
+  urlPrefix: "/ethereumArkChannel"
 
   serverInfo:
     name: "Aces ARK-ETH Lite Channel Service"

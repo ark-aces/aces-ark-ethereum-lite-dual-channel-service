@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@Entity
+@Entity(name = "ethereumArkChannel.ServiceCapacityEntity")
 @Table(name = "service_capacities", schema = "ethereum_ark_channel")
 public class ServiceCapacityEntity {
 

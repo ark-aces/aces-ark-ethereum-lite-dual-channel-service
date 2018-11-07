@@ -7,8 +7,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@Entity
-@Table(name = "service_capacities", schema = "ethereum_ark_channel")
+@Entity(name = "arkEthereumChannel.ServiceCapacityEntity")
+@Table(name = "service_capacities", schema = "ark_ethereum_channel")
 public class ServiceCapacityEntity {
 
     @Id

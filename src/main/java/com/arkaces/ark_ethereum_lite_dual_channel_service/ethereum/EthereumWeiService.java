@@ -22,4 +22,10 @@ public class EthereumWeiService {
                 .setScale(18, BigDecimal.ROUND_UP)
                 .divide(new BigDecimal(WEI_PER_ETHER), BigDecimal.ROUND_UP);
     }
+
+    public BigDecimal toEther(BigInteger wei) {
+        return new BigDecimal(wei)
+                .setScale(18, BigDecimal.ROUND_UP)
+                .divide(new BigDecimal(WEI_PER_ETHER), BigDecimal.ROUND_UP);
+    }
 }

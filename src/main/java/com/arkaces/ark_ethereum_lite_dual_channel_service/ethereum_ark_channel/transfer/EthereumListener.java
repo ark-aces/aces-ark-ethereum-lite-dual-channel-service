@@ -1,6 +1,5 @@
 package com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.transfer;
 
-import com.arkaces.ark_ethereum_lite_dual_channel_service.ark_ethereum_channel.transfer.TransferEntity;
 import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.config.Config;
 import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.contract.ContractEntity;
 import com.arkaces.ark_ethereum_lite_dual_channel_service.ethereum_ark_channel.contract.ContractRepository;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
-public class EthereumEventListener {
+public class EthereumListener {
 
     @Qualifier("ethereumArkChannel.contractRepository")
     private final ContractRepository contractRepository;
@@ -44,18 +43,16 @@ public class EthereumEventListener {
 
             // Get first block (latest block)
             Block latestBlock = ethereumService.getLatestBlock();
-
-            log.info("last block " + latestBlock);
+            log.debug("last block " + latestBlock);
 
             Integer latestBlockNumber = Integer.decode(latestBlock.getNumber());
-
-            log.info("last block number: " + latestBlockNumber);
+            log.debug("last block number: " + latestBlockNumber);
 
             // Iterate through blocks using parent hash of last block
             Block lastBlock = latestBlock;
             Map<String, Transaction> transactionsById = new HashMap<>();
             for (int i = 1; i <= config.getMaxScanBlockDepth(); i++) {
-                log.info("Scan depth " + i);
+                log.debug("Scan depth " + i);
                 Block block = ethereumService.getBlockByHash(lastBlock.getParentHash());
                 if (block == null) {
                     continue;
@@ -75,7 +72,7 @@ public class EthereumEventListener {
 
                 Set<String> newTxnIds = transactionsById.values().stream()
                         .filter(transaction -> ! existingTxnIds.contains(transaction.getHash()))
-                        .filter(transaction -> transaction.getTo().equals(contractEntity.getDepositEthAddress()))
+                        .filter(transaction -> transaction.getTo() != null && transaction.getTo().equals(contractEntity.getDepositEthAddress()))
                         .filter(transaction -> {
                             Integer confirmations = latestBlockNumber - Integer.decode(transaction.getBlockNumber());
                             return confirmations >= config.getMinConfirmations();

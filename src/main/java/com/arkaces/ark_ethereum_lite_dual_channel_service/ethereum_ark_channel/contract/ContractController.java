@@ -27,7 +27,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 @ConditionalOnProperty("ethereumArkChannel.enabled")
-@RequestMapping(path = "/${ethereumArkChannel.urlPrefix}")
+@RequestMapping(path = "${ethereumArkChannel.urlPrefix}")
 public class ContractController {
     
     private final IdentifierGenerator identifierGenerator;
