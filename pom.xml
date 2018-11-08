@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.arkaces</groupId>
-	<artifactId>ark_bitcoin_lite_channel_service</artifactId>
+	<artifactId>ark_ethereum_lite_dual_channel_service</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
-	<name>ark_bitcoin_lite_channel_service</name>
-	<description>ACES Ark-Bitcoin Lite Channel Service</description>
+	<name>ark_ethereum_lite_dual_channel_service</name>
+	<description>ACES Ark-Ethereum Lite Dual Channel Service</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
